@@ -81,21 +81,21 @@ class Brick:
         pygame.draw.rect(screen, (self.color), (self.x, self.y, self.width, self.height))
 
         for ball in balls:
-            if 0 <= self.x - ball.x <= rad + 1 and self.y <= ball.y <= self.y + self.height:
+            if 0 <= self.x - ball.x <= rad and self.y <= ball.y <= self.y + self.height:
                 ball.reverse_x()
                 self.hit()
-                ball.x -= 5
-            if 0 <= ball.x - (self.x + self.width) <= rad + 1 and self.y <= ball.y <= self.y + self.height:
+                ball.x -= rad
+            if 0 <= ball.x - (self.x + self.width) <= rad and self.y <= ball.y <= self.y + self.height:
                 ball.reverse_x()
-                ball.x += 5
+                ball.x += rad
                 self.hit()
-            if 0 <= ball.y - (self.y + self.height) <= rad + 1 and self.x <= ball.x <= self.x + self.width:
+            if 0 <= ball.y - (self.y + self.height) <= rad and self.x <= ball.x <= self.x + self.width:
                 ball.reverse_y()
-                ball.y += 5
+                ball.y += rad
                 self.hit()
-            if 0 <= self.y - ball.y <= rad + 1 and self.x <= ball.x <= self.x + self.width:
+            if 0 <= self.y - ball.y <= rad and self.x <= ball.x <= self.x + self.width:
                 ball.reverse_y()
-                ball.y -= 5
+                ball.y -= rad
                 self.hit()
 
     def hit(self):
