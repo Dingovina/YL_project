@@ -7,7 +7,7 @@ con = sqlite3.connect('scoreboard.db')
 cur = con.cursor()
 
 
-# Функция, возвращающая координаты для отрисовки вращающейся палки (на этапе игры STAGE1)
+# Функция, возвращающая координаты для отрисовки вращающейся палки (на этапе игры stage1)
 def where(range, ang, cords):
     ang = math.radians(ang)
     return int(cords[0] - range * math.cos(ang)), int(cords[1] - range * math.sin(ang))
