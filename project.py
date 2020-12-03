@@ -503,7 +503,6 @@ if __name__ == '__main__':
                 if running:
                     # Вторая стадия игры: Основной игровой процесс
                     while stage2:
-                        print(player_points)
                         if not stop:
                             if not running:
                                 pygame.quit()
@@ -531,19 +530,19 @@ if __name__ == '__main__':
                             pygame.draw.rect(screen, (255, 255, 255), stick.get_rect())
                             # Движение и активация бонусов Multiball
                             for bonus_ball in bonus_balls:
-                                bonus_ball.y += 2
-                                pygame.draw.circle(screen, bonus_ball.color, (bonus_ball.x, bonus_ball.y), bonus_ball.r)
+                                bonus_ball.y += balls_speed // 2
+                                pygame.draw.circle(screen, bonus_ball.color, (bonus_ball.x, int(bonus_ball.y)), bonus_ball.r)
                                 if stick.x <= bonus_ball.x <= stick.x + stick.size and (
                                         -1 * bonus_ball.r) <= stick.y - bonus_ball.y <= bonus_ball.r:
-                                    balls.append(Ball((bonus_ball.x, bonus_ball.y - 15)))
+                                    balls.append(Ball((bonus_ball.x, int(bonus_ball.y) - 15)))
                                     balls[-1].x_move = False
                                     balls[-1].y_move = False
                                     balls[-1].ang = 45
-                                    balls.append(Ball((bonus_ball.x, bonus_ball.y - 15)))
+                                    balls.append(Ball((bonus_ball.x, int(bonus_ball.y) - 15)))
                                     balls[-1].x_move = False
                                     balls[-1].y_move = False
                                     balls[-1].ang = 90
-                                    balls.append(Ball((bonus_ball.x, bonus_ball.y - 15)))
+                                    balls.append(Ball((bonus_ball.x, int(bonus_ball.y) - 15)))
                                     balls[-1].x_move = True
                                     balls[-1].y_move = False
                                     balls[-1].ang = 45
@@ -553,8 +552,8 @@ if __name__ == '__main__':
                                     bonus_ball.on_field = False
                             # Движение и активация бонусов Long_stick
                             for long_stick in bonus_long_stick:
-                                long_stick.y += 2
-                                pygame.draw.circle(screen, long_stick.color, (long_stick.x, long_stick.y), long_stick.r)
+                                long_stick.y += balls_speed // 2
+                                pygame.draw.circle(screen, long_stick.color, (long_stick.x, int(long_stick.y)), long_stick.r)
                                 if stick.x <= long_stick.x <= stick.x + stick.size and 0 <= stick.y - long_stick.y <= long_stick.r:
                                     long_stick.on_field = False
                                     if long_stick_time <= 0:
