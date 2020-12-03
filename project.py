@@ -7,7 +7,7 @@ con = sqlite3.connect('scoreboard.db')
 cur = con.cursor()
 
 
-# Функция, возвращающая координаты для отрисовки вращающейся палки (на этапе игры stage1)
+# Функция, возвращающая координаты для отрисовки вращающейся палки (на этапе игры STAGE1)
 def where(range, ang, cords):
     ang = math.radians(ang)
     return int(cords[0] - range * math.cos(ang)), int(cords[1] - range * math.sin(ang))
@@ -201,7 +201,7 @@ if __name__ == '__main__':
             screen.fill((0, 0, 0))
 
             font = pygame.font.Font(None, 100)
-            text = font.render("Таблица лидеров", True, (100, 255, 100))
+            text = font.render("Начать игру", True, (100, 255, 100))
             text_x = width // 2 - text.get_width() // 2
             text_y = height // 2 - 2 * text.get_height()
             text_w = text.get_width()
@@ -211,7 +211,7 @@ if __name__ == '__main__':
                                                    text_w + 20, text_h + 20), 1)
 
             font = pygame.font.Font(None, 100)
-            text = font.render("Начать игру", True, (100, 255, 100))
+            text = font.render("Таблица лидеров", True, (100, 255, 100))
             text_x1 = width // 2 - text.get_width() // 2
             text_y1 = height // 2
             text_w1 = text.get_width()
@@ -236,10 +236,10 @@ if __name__ == '__main__':
 
                 if event.type == pygame.MOUSEBUTTONUP:
                     x, y = event.pos
-                    if text_x <= x <= text_x + text_w and text_y <= y <= text_y + text_h:
+                    if text_x1 <= x <= text_x1 + text_w1 and text_y1 <= y <= text_y1 + text_h1:
                         start_screen = False
                         score_screen = True
-                    if text_x1 <= x <= text_x1 + text_w1 and text_y1 <= y <= text_y1 + text_h1:
+                    if text_x <= x <= text_x + text_w and text_y <= y <= text_y + text_h:
                         start_screen = False
                         stage0 = True
                     if text_x2 <= x <= text_x2 + text_w2 and text_y2 <= y <= text_y2 + text_h2:
