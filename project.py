@@ -503,6 +503,7 @@ if __name__ == '__main__':
                 if running:
                     # Вторая стадия игры: Основной игровой процесс
                     while stage2:
+                        print(player_points)
                         if not stop:
                             if not running:
                                 pygame.quit()
@@ -518,6 +519,9 @@ if __name__ == '__main__':
                                     row += 1
                                     for brick in bricks:
                                         brick.y += brick_height
+                                        for ball in balls:
+                                            if ball.y <= brick.y:
+                                                ball.y += brick.y - ball.y + 5
                                     for i in range(6):
                                         if random.randint(1, 8) != 1:
                                             bricks.append(
@@ -544,7 +548,7 @@ if __name__ == '__main__':
                                     balls[-1].y_move = False
                                     balls[-1].ang = 45
                                     bonus_ball.on_field = False
-                                    player_points += 1
+                                    player_points += 10
                                 elif bonus_ball.y >= height:
                                     bonus_ball.on_field = False
                             # Движение и активация бонусов Long_stick
@@ -556,7 +560,7 @@ if __name__ == '__main__':
                                     if long_stick_time <= 0:
                                         stick.size += 50
                                     long_stick_time = 10
-                                    player_points += 1
+                                    player_points += 10
                                 if long_stick.y >= height:
                                     long_stick.on_field = False
 
@@ -574,6 +578,8 @@ if __name__ == '__main__':
                             bonus_long_stick = [i for i in bonus_long_stick if i.on_field]
                             if len(balls) == 0:
                                 stage2 = False
+                            if len(bricks) == 0:
+                                player_points += 10
                         for event in pygame.event.get():
                             if event.type == pygame.QUIT:
                                 running = False
