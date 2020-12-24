@@ -2,9 +2,16 @@ import pygame
 import math
 import random
 import sqlite3
+import os
+import sys
 
-con = sqlite3.connect('scoreboard.db')
+pygame.init()
+pygame.display.set_caption('Game')
+size = width, height = 777, 500
+screen = pygame.display.set_mode(size)
+con = sqlite3.connect(os.path.join('data', 'scoreboard.db'))
 cur = con.cursor()
+GRAVITY = 0.2
 
 
 # Функция, возвращающая координаты для отрисовки вращающейся палки (на этапе игры STAGE1)
@@ -29,6 +36,22 @@ def save(id, player_name, player_points):
 def add_points(points):
     global player_points
     player_points += points
+
+
+def load_image(name, colorkey=None):
+    fullname = os.path.join('data', name)
+    if not os.path.isfile(fullname):
+        print(f"Файл с изображением '{fullname}' не найден")
+        sys.exit()
+    image = pygame.image.load(fullname)
+    if colorkey is not None:
+        image = image.convert()
+        if colorkey == -1:
+            colorkey = image.get_at((0, 0))
+        image.set_colorkey(colorkey)
+    else:
+        image = image.convert_alpha()
+    return image
 
 
 # Класс отвечающий за создание и передвижение мячика с бонусом Multiball
@@ -71,13 +94,13 @@ class Brick:
         self.points = self.hp * 50
 
     def check(self):
-        self.color = (255, 0, 255 / 4 * self.hp)
+        self.color = (255, 0, min(255, 255 / 4 * self.hp))
         if self.bonus_ball:
-            self.color = (0, 255, 255 / 4 * self.hp)
+            self.color = (0, 255, min(255, 255 / 4 * self.hp))
         elif self.bonus_long_stick:
-            self.color = (0, 0, 255 / 4 * self.hp)
+            self.color = (0, 0, min(255, 255 / 4 * self.hp))
         if self.bonus_long_stick and self.bonus_ball:
-            self.color = (255, 255, 255 / 4 * self.hp)
+            self.color = (255, 255, min(255, 255 / 4 * self.hp))
         pygame.draw.rect(screen, (self.color), (self.x, self.y, self.width, self.height))
 
         for ball in balls:
@@ -99,6 +122,7 @@ class Brick:
                 self.hit()
 
     def hit(self):
+        create_particles((self.x + 5, self.y + 5))
         self.hp -= 1
         if self.hp == 0:
             self.breakk()
@@ -181,15 +205,48 @@ class Ball:
             self.x_move = True
 
 
+class Particle(pygame.sprite.Sprite):
+    fire = [load_image("star.png")]
+    for scale in (10, 15, 8):
+        fire.append(pygame.transform.scale(fire[0], (scale, scale)))
+
+    def __init__(self, pos, dx, dy):
+        super().__init__(all_sprites)
+        self.image = random.choice(self.fire[1:])
+        self.rect = self.image.get_rect()
+
+        self.velocity = [dx, dy]
+
+        self.rect.x, self.rect.y = pos
+
+        self.gravity = GRAVITY
+
+    def update(self):
+
+        self.velocity[1] += self.gravity
+
+        self.rect.x += self.velocity[0]
+        self.rect.y += self.velocity[1]
+
+        if not self.rect.colliderect((0, 0, width, height)):
+            self.kill()
+
+
+def create_particles(position):
+    particle_count = 3
+
+    numbers = [-7, -6, -5, -4, -3, 3, 4, 5, 6, 7]
+    for _ in range(particle_count):
+        Particle(position, random.choice(numbers), random.choice(numbers))
+
+
 if __name__ == '__main__':
-    pygame.init()
-    pygame.display.set_caption('Game')
-    size = width, height = 777, 500
-    screen = pygame.display.set_mode(size)
     in_game = True
     start_screen = True
     score_screen = False
     help_screen = False
+    all_sprites = pygame.sprite.Group()
+    particl_flag = False
     button_x = 0
     button_y = 0
     button_x1 = 0
@@ -424,7 +481,7 @@ if __name__ == '__main__':
                         if event.type == pygame.QUIT:
                             running = False
                         if event.type == pygame.KEYDOWN:
-                            if event.unicode in 'qwertyuiopasdfghjklzxcvbnm[]-_()1234567890!@$&*+=/~':
+                            if event.unicode in 'qwertyuiopasdfghjklzxcvbnm[]-_()1234567890!@$&*+=/~.':
                                 player_name += event.unicode
                             elif event.key == 8:
                                 player_name = player_name[:-1]
@@ -492,7 +549,7 @@ if __name__ == '__main__':
                 long_stick_time = 0
                 bonus_long_stick = []
                 for i in range(6):
-                    for j in range(5):
+                    for j in range(4):
                         if random.randint(1, 100) <= 70:
                             bricks.append(
                                 Brick(brick_width * i, brick_height * j, brick_width - 1, brick_height - 1, row))
@@ -508,13 +565,14 @@ if __name__ == '__main__':
                                 pygame.quit()
                                 stage2 = False
                             t += 1
+
                             if t % fps == 0:
                                 sec += 1
                                 long_stick_time -= 1
                                 if long_stick_time == 0:
                                     stick.size -= 50
                                 if sec % 8 == 0:
-                                    balls_speed += 0.5
+                                    balls_speed += 0.2
                                     row += 1
                                     for brick in bricks:
                                         brick.y += brick_height
@@ -522,7 +580,7 @@ if __name__ == '__main__':
                                             if ball.y <= brick.y:
                                                 ball.y += brick.y - ball.y + 5
                                     for i in range(6):
-                                        if random.randint(1, 8) != 1:
+                                        if random.randint(1, 100) < 65:
                                             bricks.append(
                                                 Brick(brick_width * i, 0, brick_width - 1, brick_height - 1, row))
 
@@ -531,7 +589,8 @@ if __name__ == '__main__':
                             # Движение и активация бонусов Multiball
                             for bonus_ball in bonus_balls:
                                 bonus_ball.y += balls_speed // 2
-                                pygame.draw.circle(screen, bonus_ball.color, (bonus_ball.x, int(bonus_ball.y)), bonus_ball.r)
+                                pygame.draw.circle(screen, bonus_ball.color, (bonus_ball.x, int(bonus_ball.y)),
+                                                   bonus_ball.r)
                                 if stick.x <= bonus_ball.x <= stick.x + stick.size and (
                                         -1 * bonus_ball.r) <= stick.y - bonus_ball.y <= bonus_ball.r:
                                     balls.append(Ball((bonus_ball.x, int(bonus_ball.y) - 15)))
@@ -553,7 +612,8 @@ if __name__ == '__main__':
                             # Движение и активация бонусов Long_stick
                             for long_stick in bonus_long_stick:
                                 long_stick.y += balls_speed // 2
-                                pygame.draw.circle(screen, long_stick.color, (long_stick.x, int(long_stick.y)), long_stick.r)
+                                pygame.draw.circle(screen, long_stick.color, (long_stick.x, int(long_stick.y)),
+                                                   long_stick.r)
                                 if stick.x <= long_stick.x <= stick.x + stick.size and 0 <= stick.y - long_stick.y <= long_stick.r:
                                     long_stick.on_field = False
                                     if long_stick_time <= 0:
@@ -565,6 +625,7 @@ if __name__ == '__main__':
 
                             for ball in balls:
                                 ball.move()
+
                             for brick in bricks:
                                 if not brick.broken:
                                     brick.check()
@@ -578,6 +639,7 @@ if __name__ == '__main__':
                             if len(balls) == 0:
                                 stage2 = False
                             if len(bricks) == 0:
+                                particl_flag = True
                                 player_points += 10
                         for event in pygame.event.get():
                             if event.type == pygame.QUIT:
@@ -595,6 +657,8 @@ if __name__ == '__main__':
                                 stick.x = x
                                 pygame.draw.rect(screen, (255, 255, 255), stick.get_rect())
 
+                        all_sprites.update()
+                        all_sprites.draw(screen)
                         pygame.display.flip()
                         clock.tick(fps)
                     # Экран, отображаемый после окончания игры
